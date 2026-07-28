@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بوابة نتائج الثانوية العامة</title>
+    <!-- استدعاء خط Cairo المميز للمواقع التعليمية -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-hover: #1d4ed8;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --accent: #0284c7;
+            --success: #16a34a;
+            --border: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Cairo', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .main-card {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 650px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, #3b82f6 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .body-content {
+            padding: 30px 25px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .input-group {
+            position: relative;
+            flex: 1;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            outline: none;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        input[type="number"]:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.15);
+        }
+
+        /* إلغاء أسهم إدخال الأرقام */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        button {
+            padding: 14px 28px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .error-message {
+            display: none;
+            background-color: #fef2f2;
+            color: #dc2626;
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 600;
+            margin-bottom: 20px;
+            border: 1px solid #fecaca;
+        }
+
+        .result-container {
+            display: none;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .student-info {
+            background: #f1f5f9;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .student-info div {
+            font-weight: 700;
+            font-size: 15px;
+        }
+
+        .student-info span {
+            color: var(--primary);
+        }
+
+        .subject-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 25px;
+        }
+
+        .subject-table th, .subject-table td {
+            padding: 12px 15px;
+            text-align: right;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .subject-table th {
+            background-color: #f8fafc;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .subject-table td {
+            font-weight: 600;
+        }
+
+        .mark-badge {
+            display: inline-block;
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 16px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            text-align: center;
+        }
+
+        .summary-box h3 {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-bottom: 5px;
+        }
+
+        .summary-box p {
+            font-size: 22px;
+            font-weight: 800;
+        }
+
+        .percentage {
+            color: #38bdf8;
+        }
+
+        .status-badge {
+            background: rgba(22, 163, 74, 0.2);
+            color: #4ade80;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        @media (max-width: 480px) {
+            .search-box {
+                flex-direction: column;
+            }
+            .student-info {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .summary-card {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-card">
+    <div class="header">
+        <h1>وزارة التربية والتعليم</h1>
+        <p>بوابة الاستعلام عن نتائج الثانوية العامة</p>
+    </div>
+
+    <div class="body-content">
+        <!-- مربع البحث -->
+        <div class="search-box">
+            <div class="input-group">
+                <input type="number" id="seatInput" placeholder="أدخل رقم الجلوس..." />
+            </div>
+            <button onclick="getScore()">عرض النتيجة</button>
+        </div>
+
+        <!-- رسالة الخطأ -->
+        <div id="errorMessage" class="error-message">
+            عذراً، رقم الجلوس غير موجود. يرجى التأكد وإعادة المحاولة.
+        </div>
+
+        <!-- منطقة النتيجة -->
+        <div id="resultArea" class="result-container">
+            <div class="student-info">
+                <div>الاسم: <span id="studentName"></span></div>
+                <div>رقم الجلوس: <span id="studentSeat"></span></div>
+            </div>
+
+            <table class="subject-table">
+                <thead>
+                    <tr>
+                        <th>المادة</th>
+                        <th>الدرجة العظمى</th>
+                        <th>درجة الطالب</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>اللغة العربية</td>
+                        <td>80</td>
+                        <td><span class="mark-badge" id="arabicScore"></span></td>
+                    </tr>
+                    <tr>
+                        <td>اللغة الإنجليزية</td>
+                        <td>60</td>
+                        <td><span class="mark-badge" id="englishScore"></span></td>
+                    </tr>
+                    <tr>
+                        <td>الكيمياء</td>
+                        <td>60</td>
+                        <td><span class="mark-badge" id="chemScore"></span></td>
+                    </tr>
+                    <tr>
+                        <td>الفيزياء</td>
+                        <td>60</td>
+                        <td><span class="mark-badge" id="physScore"></span></td>
+                    </tr>
+                    <tr>
+                        <td>الأحياء</td>
+                        <td>60</td>
+                        <td><span class="mark-badge" id="bioScore"></span></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="summary-card">
+                <div class="summary-box">
+                    <h3>المجموع الكلي</h3>
+                    <p><span id="totalScore"></span> / 320</p>
+                </div>
+                <div class="summary-box">
+                    <h3>النسبة المئوية</h3>
+                    <p class="percentage"><span id="percentage"></span>%</p>
+                </div>
+                <div class="summary-box">
+                    <h3>الحالة</h3>
+                    <span class="status-badge">ناجح</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // قاعدة البيانات المُحدثة بأرقام الجلوس والأسماء المطلوبة
+    const resultsDatabase = {
+        "2573641": {
+            name: "عبد الرحمن محمد صحبي عطية خليل",
+            arabic: 71,
+            english: 54,
+            chem: 53,
+            phys: 53,
+            bio: 54.4,
+            total: "285.44",
+            percentage: "89.2"
+        },
+        "2573710": {
+            name: "محمد مصطفي محمد طلبة",
+            arabic: 58,
+            english: 44,
+            chem: 45,
+            phys: 43,
+            bio: 44.85,
+            total: "234.85",
+            percentage: "73.39"
+        }
+    };
+
+    function getScore() {
+        const seatNumber = document.getElementById("seatInput").value.trim();
+        const resultArea = document.getElementById("resultArea");
+        const errorMessage = document.getElementById("errorMessage");
+
+        if (resultsDatabase[seatNumber]) {
+            const student = resultsDatabase[seatNumber];
+
+            // تعبئة البيانات في الواجهة
+            document.getElementById("studentName").innerText = student.name;
+            document.getElementById("studentSeat").innerText = seatNumber;
+            document.getElementById("arabicScore").innerText = student.arabic;
+            document.getElementById("englishScore").innerText = student.english;
+            document.getElementById("chemScore").innerText = student.chem;
+            document.getElementById("physScore").innerText = student.phys;
+            document.getElementById("bioScore").innerText = student.bio;
+            document.getElementById("totalScore").innerText = student.total;
+            document.getElementById("percentage").innerText = student.percentage;
+
+            // إظهار النتيجة وإخفاء الخطأ
+            errorMessage.style.display = "none";
+            resultArea.style.display = "block";
+        } else {
+            // إخفاء النتيجة وإظهار الخطأ
+            resultArea.style.display = "none";
+            errorMessage.style.display = "block";
+        }
+    }
+</script>
+
+</body>
+</html>
