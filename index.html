@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>بوابة نتائج الثانوية العامة</title>
-    <!-- استدعاء خط Cairo المميز للم مواقع التعليمية -->
+    <!-- استدعاء خط Cairo المميز للمواقع التعليمية -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
     
     <style>
@@ -16,7 +16,6 @@
             --text-main: #0f172a;
             --text-muted: #64748b;
             --accent: #0284c7;
-            --success: #16a34a;
             --border: #e2e8f0;
         }
 
@@ -90,6 +89,7 @@
             outline: none;
             transition: all 0.3s ease;
             text-align: center;
+            direction: ltr;
         }
 
         input[type="number"]:focus {
@@ -104,7 +104,7 @@
             margin: 0;
         }
 
-        button {
+        .btn {
             padding: 14px 28px;
             background-color: var(--primary);
             color: white;
@@ -116,7 +116,7 @@
             transition: background-color 0.2s ease;
         }
 
-        button:hover {
+        .btn:hover {
             background-color: var(--primary-hover);
         }
 
@@ -193,6 +193,7 @@
             border-radius: 8px;
             font-weight: 700;
             font-size: 14px;
+            direction: ltr;
         }
 
         .summary-card {
@@ -215,6 +216,7 @@
         .summary-box p {
             font-size: 22px;
             font-weight: 800;
+            direction: ltr;
         }
 
         .percentage {
@@ -228,6 +230,66 @@
             border-radius: 20px;
             font-size: 14px;
             font-weight: bold;
+        }
+
+        /* ==================== تنسيقات نافذة التعطيل ==================== */
+        .freeze-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 999999;
+            padding: 20px;
+            user-select: none;
+        }
+
+        .freeze-box {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 40px 30px;
+            max-width: 450px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--border);
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .freeze-icon {
+            width: 64px;
+            height: 64px;
+            background-color: #fef2f2;
+            color: #ef4444;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px auto;
+            font-size: 32px;
+        }
+
+        .freeze-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 10px;
+        }
+
+        .freeze-desc {
+            font-size: 15px;
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
         }
 
         @media (max-width: 480px) {
@@ -247,6 +309,16 @@
 </head>
 <body>
 
+<!-- نافذة توقيف الموقع (تمنع التفاعل نهائياً) -->
+<div class="freeze-overlay">
+    <div class="freeze-box">
+        <div class="freeze-icon">⚠️</div>
+        <h2 class="freeze-title">عذراً، الخدمة متوقفة مؤقتاً</h2>
+        <p class="freeze-desc">تم إيقاف الموقع نتيجة للضغط الهائل. يرجى المحاولة مرة أخرى لاحقاً.</p>
+    </div>
+</div>
+
+<!-- محتوى الموقع الرئيسي (سيكون خلف النافذة ومغلق) -->
 <div class="main-card">
     <div class="header">
         <h1>وزارة التربية والتعليم</h1>
@@ -259,7 +331,7 @@
             <div class="input-group">
                 <input type="number" id="seatInput" placeholder="أدخل رقم الجلوس..." required />
             </div>
-            <button type="submit">عرض النتيجة</button>
+            <button type="submit" class="btn">عرض النتيجة</button>
         </form>
 
         <!-- رسالة الخطأ -->
@@ -271,7 +343,7 @@
         <div id="resultArea" class="result-container">
             <div class="student-info">
                 <div>الاسم: <span id="studentName"></span></div>
-                <div>رقم الجلوس: <span id="studentSeat"></span></div>
+                <div>رقم الجلوس: <span id="studentSeat" style="direction: ltr; display: inline-block;"></span></div>
             </div>
 
             <table class="subject-table">
@@ -330,7 +402,7 @@
 </div>
 
 <script>
-    // قاعدة البيانات المُحدثة
+    // قاعدة البيانات
     const resultsDatabase = {
         "2573641": {
             name: "عبد الرحمن محمد صحبي عطية خليل",
@@ -372,7 +444,6 @@
         if (resultsDatabase[seatNumber]) {
             const student = resultsDatabase[seatNumber];
 
-            // تعبئة البيانات في الواجهة
             document.getElementById("studentName").innerText = student.name;
             document.getElementById("studentSeat").innerText = seatNumber;
             document.getElementById("arabicScore").innerText = student.arabic;
@@ -383,11 +454,9 @@
             document.getElementById("totalScore").innerText = student.total;
             document.getElementById("percentage").innerText = student.percentage;
 
-            // إظهار النتيجة وإخفاء الخطأ
             errorMessage.style.display = "none";
             resultArea.style.display = "block";
         } else {
-            // إخفاء النتيجة وإظهار الخطأ
             resultArea.style.display = "none";
             errorMessage.style.display = "block";
         }
