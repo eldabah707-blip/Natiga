@@ -144,23 +144,24 @@
 
         .student-info {
             background: #f1f5f9;
-            padding: 15px 20px;
+            padding: 18px 20px;
             border-radius: 12px;
             margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px 20px;
         }
 
         .student-info div {
             font-weight: 700;
-            font-size: 15px;
+            font-size: 14px;
+            color: var(--text-muted);
         }
 
         .student-info span {
             color: var(--primary);
+            font-size: 15px;
+            display: inline-block;
         }
 
         .subject-table {
@@ -297,8 +298,7 @@
                 flex-direction: column;
             }
             .student-info {
-                flex-direction: column;
-                align-items: flex-start;
+                grid-template-columns: 1fr;
             }
             .summary-card {
                 flex-direction: column;
@@ -343,7 +343,10 @@
         <div id="resultArea" class="result-container">
             <div class="student-info">
                 <div>الاسم: <span id="studentName"></span></div>
-                <div>رقم الجلوس: <span id="studentSeat" style="direction: ltr; display: inline-block;"></span></div>
+                <div>رقم الجلوس: <span id="studentSeat" style="direction: ltr;"></span></div>
+                <!-- خانات المحافظة والمدرسة تظهر تلقائياً لرقم الجلوس المخصص -->
+                <div id="govRow" style="display: none;">المحافظة: <span id="studentGov"></span></div>
+                <div id="schoolRow" style="display: none;">المدرسة: <span id="studentSchool"></span></div>
             </div>
 
             <table class="subject-table">
@@ -406,9 +409,22 @@
 
     if (isSiteFrozen) {
         document.getElementById("freezeOverlay").style.display = "flex";
+        document.body.style.overflow = "hidden";
     }
 
     const resultsDatabase = {
+        "2593589": {
+            name: "شهد محمود سعيد رزق",
+            governorate: "البحيرة",
+            school: "أحمد عبد الرؤف الثانوية المشتركة",
+            arabic: 71,
+            english: 53,
+            chem: 53,
+            phys: 53,
+            bio: 53.58,
+            total: "283.58",
+            percentage: "88.62"
+        },
         "2573650": {
             name: "عبد الرحمن محمد صحبي عطية خليل",
             arabic: 71,
@@ -420,7 +436,7 @@
             percentage: "89.19"
         },
         "2573519": {
-            name: "محمد مصطفي محمد البنا",
+            name: "محمد مصطفى محمد البنا",
             arabic: 42,
             english: 31,
             chem: 31,
@@ -430,7 +446,7 @@
             percentage: "52.00"
         },
         "2573723": {
-            name: "محمد مصطفي محمد البنا",
+            name: "أحمد مصطفى محمد البنا",
             arabic: 61,
             english: 46,
             chem: 45,
@@ -507,6 +523,8 @@
         const seatNumber = document.getElementById("seatInput").value.trim();
         const resultArea = document.getElementById("resultArea");
         const errorMessage = document.getElementById("errorMessage");
+        const govRow = document.getElementById("govRow");
+        const schoolRow = document.getElementById("schoolRow");
 
         let student = null;
 
@@ -520,6 +538,18 @@
         if (student) {
             document.getElementById("studentName").innerText = student.name;
             document.getElementById("studentSeat").innerText = seatNumber;
+
+            // إظهار المحافظة والمدرسة فقط إذا كانا معرفين للطالب
+            if (student.governorate && student.school) {
+                document.getElementById("studentGov").innerText = student.governorate;
+                document.getElementById("studentSchool").innerText = student.school;
+                govRow.style.display = "block";
+                schoolRow.style.display = "block";
+            } else {
+                govRow.style.display = "none";
+                schoolRow.style.display = "none";
+            }
+            
             document.getElementById("arabicScore").innerText = student.arabic;
             document.getElementById("englishScore").innerText = student.english;
             document.getElementById("chemScore").innerText = student.chem;
