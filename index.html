@@ -241,7 +241,7 @@
             height: 100vh;
             background-color: rgba(15, 23, 42, 0.75);
             backdrop-filter: blur(8px);
-            display: flex;
+            display: none; /* تم تغييرها إلى none لتمكين الاستعلام */
             justify-content: center;
             align-items: center;
             z-index: 999999;
@@ -309,8 +309,8 @@
 </head>
 <body>
 
-<!-- نافذة توقيف الموقع (تمنع التفاعل نهائياً) -->
-<div class="freeze-overlay">
+<!-- نافذة توقيف الموقع (مخفية الآن حتى تستطيع البحث) -->
+<div class="freeze-overlay" id="freezeOverlay">
     <div class="freeze-box">
         <div class="freeze-icon">⚠️</div>
         <h2 class="freeze-title">عذراً، الخدمة متوقفة مؤقتاً</h2>
@@ -318,7 +318,7 @@
     </div>
 </div>
 
-<!-- محتوى الموقع الرئيسي (سيكون خلف النافذة ومغلق) -->
+<!-- محتوى الموقع الرئيسي -->
 <div class="main-card">
     <div class="header">
         <h1>وزارة التربية والتعليم</h1>
@@ -433,6 +433,16 @@
             bio: 36.44,
             total: "189.44",
             percentage: "59.2"
+        },
+        "2573648": {
+            name: "عبد الرحمن سعيد شعبان سلمان",
+            arabic: 50,
+            english: 38,
+            chem: 30,
+            phys: 38.5,
+            bio: 40.08,
+            total: "196.58",
+            percentage: "61.43"
         }
     };
 
