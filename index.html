@@ -241,6 +241,432 @@
             height: 100vh;
             background-color: rgba(15, 23, 42, 0.75);
             backdrop-filter: blur(8px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 999999;
+            padding: 20px;
+            user-select: none;
+        }
+
+        .freeze-box {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 40px 30px;
+            max-width: 450px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--border);
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .freeze-icon {
+            width: 64px;
+            height: 64px;
+            background-color: #fef2f2;
+            color: #ef4444;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px auto;
+            font-size: 32px;
+        }
+
+        .freeze-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 10px;
+        }
+
+        .freeze-desc {
+            font-size: 15px;
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @media (max-width: 480px) {
+            .search-box {
+                flex-direction: column;
+            }
+            .student-info {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .summary-card {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- نافذة توقيف الموقع -->
+<div class="freeze-overlay" id="freezeOverlay">
+    <div class="freeze-box">
+        <div class="freeze-icon">⚠️</div>
+        <h2 class="freeze-title">عذراً، الخدمة متوقفة مؤقتاً</h2>
+        <p class="freeze-desc">تم إيقاف الموقع نتيجة للضغط الهائل. يرجى المحاولة مرة أخرى لاحقاً.</p>
+    </div>
+</div>
+
+<!-- محتوى الموقع الرئيسي -->
+<div class="main-card">
+    <div class="header">
+        <h1>وزارة التربية والتعليم</h1>
+        <p>بوابة الاستعلام عن نتائج الثانوية العامة</p>
+    </div>
+
+    <div class="body-content">
+        <!-- مربع البحث -->
+        <form onsubmit="event.preventDefault(); getScore();" class="search-box">
+            <div class="input-group">
+                <input type="number" id="seatInput" placeholder="أدخل رقم الجلوس..." required />
+            </div>
+            <button type="submit" class="btn">عرض النتيجة</button>
+        </form>
+
+        <!-- رسالة الخطأ -->
+        <div id="errorMessage" class="error-message">
+            عذراً، رقم الجلوس غير موجود. يرجى التأكد وإعادة المحاولة.
+        </div>
+
+        <!-- منطقة النتيجة -->
+        <div id="resultArea" class="result-container">
+            <div class="student-info">
+                <div>الاسم: <span id="studentName"></span></div>
+                <div>رقم الجلوس: <span id="studentSeat" style="direction: ltr; display: inline-block;"></span></div>
+            </div>
+
+            <table class="subject-table">
+                <thead>
+                    <tr>
+                        <th>المادة</th>
+                        <th>الدرجة العظمى</th>
+                        <th>درجة الطالب</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>اللغة العربية</td>
+                        <td>80</td>
+                        <td><span class="mark-badge" id="arabicScore"></span></td>
+                    </tr>
+                    <tr>
+                        <td>اللغة الإنجليزية</td>
+                        <td>60</td>
+                        <td><span class="mark-badge" id="englishScore"></span></td>
+                    </tr>
+                    <tr>
+                        <td>الكيمياء</td>
+                        <td>60</td>
+                        <td><span class="mark-badge" id="chemScore"></span></td>
+                    </tr>
+                    <tr>
+                        <td>الفيزياء</td>
+                        <td>60</td>
+                        <td><span class="mark-badge" id="physScore"></span></td>
+                    </tr>
+                    <tr>
+                        <td>الأحياء</td>
+                        <td>60</td>
+                        <td><span class="mark-badge" id="bioScore"></span></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="summary-card">
+                <div class="summary-box">
+                    <h3>المجموع الكلي</h3>
+                    <p><span id="totalScore"></span> / 320</p>
+                </div>
+                <div class="summary-box">
+                    <h3>النسبة المئوية</h3>
+                    <p class="percentage"><span id="percentage"></span>%</p>
+                </div>
+                <div class="summary-box">
+                    <h3>الحالة</h3>
+                    <span class="status-badge">ناجح</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // قاعدة البيانات للطلاب المحددين
+    const resultsDatabase = {
+        "2573650": {
+            name: "عبد الرحمن محمد صحبي عطية خليل",
+            arabic: 71,
+            english: 54,
+            chem: 53,
+            phys: 53,
+            bio: 54.4,
+            total: "285.4",
+            percentage: "89.19"
+        },
+        "2573710": {
+            name: "محمد مصطفي محمد طلبة",
+            arabic: 58,
+            english: 44,
+            chem: 45,
+            phys: 43,
+            bio: 44.85,
+            total: "234.85",
+            percentage: "73.39"
+        },
+        "2573738": {
+            name: "يوسف حسين علي عبد العاطي رزق",
+            arabic: 48,
+            english: 35,
+            chem: 35,
+            phys: 35,
+            bio: 36.44,
+            total: "189.44",
+            percentage: "59.2"
+        },
+        "2573648": {
+            name: "عبد الرحمن سعيد شعبان سلمان",
+            arabic: 50,
+            english: 38,
+            chem: 30,
+            phys: 38.5,
+            bio: 40.08,
+            total: "196.58",
+            percentage: "61.43"
+        }
+    };
+
+    // أسماء عشوائية لإنشاء نتائج رقم الجلوس الذي يبدأ بـ 25
+    const randomFirstNames = ["أحمد", "محمود", "عمر", "علي", "مصطفى", "إبراهيم", "حسن", "حسين", "خالد", "زياد"];
+    const randomMiddleNames = ["محمد", "أحمد", "سيد", "عبد الله", "محمود", "فتحي", "رمضان", "السيد", "حسن"];
+    const randomLastNames = ["عبد العزيز", "إبراهيم", "مصطفى", "عامر", "حسن", "علي", "فاروق", "يوسف"];
+
+    // توليد نتيجة ديناميكية ثابتة لنفس رقم الجلوس
+    function generateDynamicStudent(seat) {
+        // استخدام رقم الجلوس كمُدخل لمنح نفس الرقم نفس النتيجة دائماً
+        let seed = 0;
+        for (let i = 0; i < seat.length; i++) {
+            seed += seat.charCodeAt(i) * (i + 1);
+        }
+        
+        const pseudoRandom = (offset) => {
+            let x = Math.sin(seed + offset) * 10000;
+            return x - Math.floor(x);
+        };
+
+        const firstName = randomFirstNames[Math.floor(pseudoRandom(1) * randomFirstNames.length)];
+        const middleName1 = randomMiddleNames[Math.floor(pseudoRandom(2) * randomMiddleNames.length)];
+        const middleName2 = randomMiddleNames[Math.floor(pseudoRandom(3) * randomMiddleNames.length)];
+        const lastName = randomLastNames[Math.floor(pseudoRandom(4) * randomLastNames.length)];
+
+        const arabic = Math.floor(50 + pseudoRandom(5) * 28); // 50 to 78
+        const english = Math.floor(36 + pseudoRandom(6) * 22); // 36 to 58
+        const chem = Math.floor(35 + pseudoRandom(7) * 23); // 35 to 58
+        const phys = Math.floor(35 + pseudoRandom(8) * 23); // 35 to 58
+        const bio = parseFloat((36 + pseudoRandom(9) * 22).toFixed(2)); // 36 to 58
+
+        const totalNum = arabic + english + chem + phys + bio;
+        const total = totalNum.toFixed(2);
+        const percentage = ((totalNum / 320) * 100).toFixed(2);
+
+        return {
+            name: `${firstName} ${middleName1} ${middleName2} ${lastName}`,
+            arabic: arabic,
+            english: english,
+            chem: chem,
+            phys: phys,
+            bio: bio,
+            total: total,
+            percentage: percentage
+        };
+    }
+
+    function getScore() {
+        const seatNumber = document.getElementById("seatInput").value.trim();
+        const resultArea = document.getElementById("resultArea");
+        const errorMessage = document.getElementById("errorMessage");
+
+        let student = null;
+
+        // 1. التحقق من أرقام الجلوس المسجلة مسبقاً
+        if (resultsDatabase[seatNumber]) {
+            student = resultsDatabase[seatNumber];
+        } 
+        // 2. إذا كان يبدأ بـ 25 ومكون من 7 أرقام يتم إنشاء نتيجة له
+        else if (/^25\d{5}$/.test(seatNumber)) {
+            student = generateDynamicStudent(seatNumber);
+        }
+
+        if (student) {
+            document.getElementById("studentName").innerText = student.name;
+            document.getElementById("studentSeat").innerText = seatNumber;
+            document.getElementById("arabicScore").innerText = student.arabic;
+            document.getElementById("englishScore").innerText = student.english;
+            document.getElementById("chemScore").innerText = student.chem;
+            document.getElementById("physScore").innerText = student.phys;
+            document.getElementById("bioScore").innerText = student.bio;
+            document.getElementById("totalScore").innerText = student.total;
+            document.getElementById("percentage").innerText = student.percentage;
+
+            errorMessage.style.display = "none";
+            resultArea.style.display = "block";
+        } else {
+            resultArea.style.display = "none";
+            errorMessage.style.display = "block";
+        }
+    }
+</script>
+
+</body>
+</html>
+
+        .btn {
+            padding: 14px 28px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .error-message {
+            display: none;
+            background-color: #fef2f2;
+            color: #dc2626;
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 600;
+            margin-bottom: 20px;
+            border: 1px solid #fecaca;
+        }
+
+        .result-container {
+            display: none;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .student-info {
+            background: #f1f5f9;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .student-info div {
+            font-weight: 700;
+            font-size: 15px;
+        }
+
+        .student-info span {
+            color: var(--primary);
+        }
+
+        .subject-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 25px;
+        }
+
+        .subject-table th, .subject-table td {
+            padding: 12px 15px;
+            text-align: right;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .subject-table th {
+            background-color: #f8fafc;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .subject-table td {
+            font-weight: 600;
+        }
+
+        .mark-badge {
+            display: inline-block;
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 14px;
+            direction: ltr;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 16px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            text-align: center;
+        }
+
+        .summary-box h3 {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-bottom: 5px;
+        }
+
+        .summary-box p {
+            font-size: 22px;
+            font-weight: 800;
+            direction: ltr;
+        }
+
+        .percentage {
+            color: #38bdf8;
+        }
+
+        .status-badge {
+            background: rgba(22, 163, 74, 0.2);
+            color: #4ade80;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        /* ==================== تنسيقات نافذة التعطيل ==================== */
+        .freeze-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(8px);
             display: none; /* تم تغييرها إلى none لتمكين الاستعلام */
             justify-content: center;
             align-items: center;
