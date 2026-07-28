@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>بوابة نتائج الثانوية العامة</title>
-    <!-- استدعاء خط Cairo المميز للمواقع التعليمية -->
+    <!-- استدعاء خط Cairo المميز للم مواقع التعليمية -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
     
     <style>
@@ -255,12 +255,12 @@
 
     <div class="body-content">
         <!-- مربع البحث -->
-        <div class="search-box">
+        <form onsubmit="event.preventDefault(); getScore();" class="search-box">
             <div class="input-group">
-                <input type="number" id="seatInput" placeholder="أدخل رقم الجلوس..." />
+                <input type="number" id="seatInput" placeholder="أدخل رقم الجلوس..." required />
             </div>
-            <button onclick="getScore()">عرض النتيجة</button>
-        </div>
+            <button type="submit">عرض النتيجة</button>
+        </form>
 
         <!-- رسالة الخطأ -->
         <div id="errorMessage" class="error-message">
@@ -330,7 +330,7 @@
 </div>
 
 <script>
-    // قاعدة البيانات المُحدثة بأرقام الجلوس والأسماء المطلوبة
+    // قاعدة البيانات المُحدثة
     const resultsDatabase = {
         "2573641": {
             name: "عبد الرحمن محمد صحبي عطية خليل",
@@ -339,8 +339,8 @@
             chem: 53,
             phys: 53,
             bio: 54.4,
-            total: "285.44",
-            percentage: "89.2"
+            total: "285.4",
+            percentage: "89.19"
         },
         "2573710": {
             name: "محمد مصطفي محمد طلبة",
@@ -351,6 +351,16 @@
             bio: 44.85,
             total: "234.85",
             percentage: "73.39"
+        },
+        "2573738": {
+            name: "يوسف حسين علي عبد العاطي رزق",
+            arabic: 48,
+            english: 35,
+            chem: 35,
+            phys: 35,
+            bio: 36.44,
+            total: "189.44",
+            percentage: "59.2"
         }
     };
 
